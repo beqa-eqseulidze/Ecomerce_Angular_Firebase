@@ -1,0 +1,19 @@
+<div class="mt-5 p-2 position-relative" style="max-width:300px; margin: 0 auto;">
+    <div *ngIf="errors" class="alert alert-danger" role="alert">
+        {{errors}}
+    </div>
+    <form  [formGroup]="form" (ngSubmit)="submit()">        
+        <div class="mb-3">
+            <label for="exampleInputEmail1" class="form-label">Email address</label>
+            <input type="email" class="form-control" id="exampleInputEmail1" formControlName="email">
+        </div>
+        <div class="mb-3">
+            <label for="exampleInputPassword1" class="form-label">Password</label>
+            <input  type="password" class="form-control" id="exampleInputPassword1" formControlName="password" >
+        </div>   
+        <button type="submit" class="btn btn-success">Login</button>
+    </form>
+    <a class="" style="position:absolute; bottom:8px ;right:8px" [routerLink]="['/auth/register']">Register</a>
+</div>
+    
+    

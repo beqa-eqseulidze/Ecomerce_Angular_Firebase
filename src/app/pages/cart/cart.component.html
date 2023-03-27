@@ -1,0 +1,28 @@
+<table class="table container">
+  <thead>
+    <tr>
+      <th scope="col">Image Url</th>
+      <th scope="col">Title</th>
+      <th scope="col">Description</th>
+      <th scope="col">Quantity</th>
+      <th scope="col">Price</th>
+      <th scope="col">Actions</th>
+
+    </tr>
+  </thead>
+  <tbody>
+    <tr *ngFor="let product of cart |async ">
+      <td><img src="{{product.image}}" alt=""></td>
+      <td>{{product.title}}</td>
+      <td>{{product.description}}</td>
+      <td>{{product.quantity}}</td>
+      <td>{{product.price*product.quantity| currency:"USD"}}</td>
+      <td>
+        <button class="btn btn-success" [routerLink]="['/product-manager/product-edit',product.id]">edit</button>
+        <!-- <button class="btn btn-success" (click)="delete(product.id)">delete</button> -->
+      </td>
+    </tr>
+  </tbody>
+</table>
+
+

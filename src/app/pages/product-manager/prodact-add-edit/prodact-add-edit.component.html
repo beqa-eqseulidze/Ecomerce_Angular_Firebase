@@ -1,0 +1,28 @@
+<div class="mt-5 p-2 position-relative" style="max-width:300px; margin: 0 auto; ">
+  <div *ngIf="errors"  class="alert alert-danger" role="alert">
+      {{errors}}
+  </div>
+  <form [formGroup]="form" (ngSubmit)="submit()">
+      <div class="mb-3">
+          <label for="title" class="form-label">Product Title</label>
+          <input type="text" class="form-control" id="title" formControlName="title">
+      </div>
+      <div class="mb-3">
+          <label for="description" class="form-label">description</label>
+          <textarea type="text" class="form-control" id="description" formControlName="description" ></textarea>
+      </div>
+      <div class="mb-3">
+          <label for="price" class="form-label">Price</label>
+          <input type="number" class="form-control" id="price" formControlName="price">
+      </div>
+      <div class="mb-3">
+        <label for="image" class="form-label">choose image</label>
+        <input type="text" class="form-control" id="image" formControlName="image">
+      </div>
+      <div class="mb-3">
+        <label for="quantity" class="form-label">Quantity</label>
+        <input type="number" class="form-control" id="quantity" formControlName="quantity">
+      </div>
+      <button type="submit" class="btn btn-success">{{productId? "edit product":"add product"}}</button>
+  </form>
+</div>

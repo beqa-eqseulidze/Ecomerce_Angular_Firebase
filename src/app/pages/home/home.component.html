@@ -1,0 +1,7 @@
+<div class="row container m-auto pt-5 justify-content-center" >
+  
+  <ng-container *ngFor="let product of products | async">
+    <app-products-item class="col-md-3" [product]="product" ></app-products-item>
+  </ng-container>
+
+</div>
