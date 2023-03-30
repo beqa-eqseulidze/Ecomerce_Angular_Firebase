@@ -41,7 +41,7 @@ export class RegisterComponent implements OnInit,OnDestroy{
         this.errors='fill all filds'
         return;
       }
-      this.authService.signIn(this.form.value)
+      this.authService.signup(this.form.value)
       .pipe(takeUntil(this.unsubscribe$))
       .subscribe({
         next:(data:IAuthResponce)=>{

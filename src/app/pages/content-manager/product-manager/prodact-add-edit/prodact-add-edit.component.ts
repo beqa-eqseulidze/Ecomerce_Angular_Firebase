@@ -1,9 +1,9 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
 import { FormGroup, FormControl, Validators } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
-import { ProductService } from '../../../core/services/product.service';
+import { ProductService } from '../../../../core/services/product.service';
 import { Subject, takeUntil, map, Subscription, Observable } from 'rxjs';
-import { IProduct } from '../../../core/interface/interfaceProduct';
+import { IProduct } from '../../../../core/interface/interfaceProduct';
 
 @Component({
   selector: 'app-prodact-add-edit',

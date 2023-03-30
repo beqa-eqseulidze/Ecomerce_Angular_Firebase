@@ -5,6 +5,7 @@ import { Subject, takeUntil } from 'rxjs';
 import { IAuthResponce } from 'src/app/core/interface/interface.signUp';
 import { AuthService } from 'src/app/core/services/auth.service';
 import { ProductService } from '../../../core/services/product.service';
+import { CartService } from '../../../core/services/cart.service';
 
 @Component({
   selector: 'app-login',
@@ -20,7 +21,8 @@ export class LoginComponent implements OnInit,OnDestroy{
   errors?:string
   constructor(
     private authService:AuthService,
-    private router:Router
+    private router:Router,
+    private cartService:CartService
   ) { }
 
   ngOnInit(): void {
@@ -31,7 +33,7 @@ export class LoginComponent implements OnInit,OnDestroy{
       password:new FormControl('',[Validators.required,Validators.minLength(5)])
     });
 
-    submit() {
+    login() {
       this.form.markAllAsTouched();
       if(this.form.invalid){
         this.errors='fill all filds'
@@ -43,6 +45,7 @@ export class LoginComponent implements OnInit,OnDestroy{
         next:(data:IAuthResponce)=>{
           this.errors=undefined;
           this.form.reset();
+          this.cartService.getCartProducts().subscribe(a=>a)
           this.router.navigate(['']);
         },
         error:({error}) =>this.errors=error.error.message

@@ -1,8 +1,8 @@
   <div class="card">
     <div class="card-body">
-      <img class=" w-100"src="{{product.image}}" alt="#">
+      <img class=" w-100"[src]="product.image" alt="#">
       <h5 class="card-title">{{product.title}}</h5>
       <p class="card-text">{{product.price | currency:'USD'}}</p>
-      <button class="btn btn-primary" (click)="addToCart(product.id,1)">add to cart</button>
+      <button class="btn btn-primary" (click)="add(product.id)">add to cart</button>
     </div>
   </div>

@@ -4,13 +4,13 @@ export interface ISignUpBody{
     returnSecureToken: boolean;
 }
 
-export interface IAuthResponce{    
+export interface IAuthResponce{
         kind?: string;
         idToken: string;
         email: string;
         refreshToken: string;
         expiresIn: string;
-        localId: string ; 
-        registered?:boolean;  
+        localId: string ;
+        registered?:boolean;
 }
 

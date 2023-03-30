@@ -1,9 +1,10 @@
 import { AfterContentChecked, Component, OnInit, OnDestroy, ViewChild, ElementRef, AfterViewChecked, OnChanges } from '@angular/core';
 import { Router } from '@angular/router';
-import { BehaviorSubject, takeUntil, Subject, Observable } from 'rxjs';
+import { BehaviorSubject, takeUntil, Subject, Observable, forkJoin, map } from 'rxjs';
 import { AuthService } from 'src/app/core/services/auth.service';
 import { ProductService } from '../../../core/services/product.service';
 import { CartService } from '../../../core/services/cart.service';
+import { IProductInCart } from '../../../core/interface/interface.product.in.cart';
 
 @Component({
   selector: 'app-header',
@@ -21,17 +22,24 @@ export class HeaderComponent implements OnInit,OnDestroy,AfterViewChecked{
     private router: Router
     ) {}
 
-    cartQuantity:Observable<number>=this.cartService.cartQuantiti$ as Observable<number>;
+    productQuantityInCart=this.cartService.productInCart$
+    .pipe(map((item:IProductInCart[])=>{
+      let result:number=0;
+      item.map(p=>{result+=p.orderQuantity})
+      return result;
+    }))
+
     unsubscribe$:Subject<any>=new Subject();
     isAuth?:BehaviorSubject<boolean>=this.authService.isAuth$;
 
     ngOnInit(): void {
-      console.log(this.cartService.cartQuantiti$.getValue());
+     if(this.authService.isAuth$.getValue()){
+      this.cartService.getCartProducts().subscribe(a=>a);
+      this.cartService.cartOwner.next(this.authService.getEmail$.getValue());
+     }
     this.productservice.getProducts()
     .pipe(takeUntil(this.unsubscribe$))
     .subscribe(data=>this.productservice.products$.next(data));
-    this.cartService.getCart().subscribe(data=>data);
-
    }
 
   logout(): void {

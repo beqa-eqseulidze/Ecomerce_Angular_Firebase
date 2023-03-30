@@ -1,6 +1,7 @@
 import { Component, NgModule } from '@angular/core';
 import { RouterModule, Routes } from '@angular/router';
 import { IsAuthGuard } from '../core/guards/is-auth.guard';
+import { CategoriesComponent } from '../pages/content-manager/categories/categories.component';
 import { LayoutComponent } from './components/layout/layout.component';
 import { NotFoundComponent } from './components/not-found/not-found.component';
 
@@ -13,12 +14,17 @@ const routes: Routes = [
       {path:'products',loadChildren:()=>import('.././pages/products/products.module').then(m=>m.ProductsModule)},
       {
         path:'cart',
-        loadChildren:()=>import('.././pages/cart/cart.module').then(m=>m.CartModule),
+        loadChildren:()=>import('../pages/cart/cart.module').then(m=>m.CartModule),
         canActivate:[IsAuthGuard]
       },
       {
         path:'product-manager',
-        loadChildren:()=>import('.././pages/product-manager/product-manager.module').then(m=>m.ProductManagerModule),
+        loadChildren:()=>import('../pages/content-manager/product-manager/product-manager.module').then(m=>m.ProductManagerModule),
+        canActivate:[IsAuthGuard]
+      },
+      {
+        path:'categories',
+        loadChildren:()=>import('../pages/content-manager/categories/categories.module').then(m=>m.CategoriesModule),
         canActivate:[IsAuthGuard]
       },
       {path:'**',component:NotFoundComponent}

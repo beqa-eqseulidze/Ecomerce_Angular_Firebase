@@ -4,6 +4,7 @@ import { AuthService } from '../../core/services/auth.service';
 import { storageService } from '../../core/services/storage.service';
 import { CartService } from '../../core/services/cart.service';
 import { ProductService } from '../../core/services/product.service';
+import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-products-item',
@@ -17,16 +18,21 @@ export class ProductsItemComponent implements OnInit {
   constructor(
     private storageService:storageService,
     private cartService:CartService,
-    private productService:ProductService
+    private productService:ProductService,
+    private authService:AuthService,
+    private route:Router
   ) { }
 
   ngOnInit(): void {
-   
+
   }
 
-  addToCart(id:string|undefined,quantity:number):void {
-    if(id&&quantity){
-      this.cartService.setCart(id,quantity)
+  add(productId:string|undefined):void {
+    if(productId && this.authService.isAuth$.getValue()){
+      this.cartService.addToCart(productId);
+    }
+    else{
+      this.route.navigate(['/auth/login'])
     }
   }
 
