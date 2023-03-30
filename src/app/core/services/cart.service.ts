@@ -1,76 +1,116 @@
-import { Injectable, OnDestroy } from '@angular/core';
+import { Injectable, OnDestroy, OnInit } from '@angular/core';
 import { IProduct } from '../interface/interfaceProduct';
 import { storageService } from './storage.service';
 import { ICart } from '../interface/interface.cart';
 import { ProductService } from './product.service';
 import { IsAuthGuard } from '../guards/is-auth.guard';
-import { Subject, takeUntil, Observable, BehaviorSubject, of, map, from } from 'rxjs';
+import { Subject, takeUntil, Observable, BehaviorSubject, of, map, from, forkJoin, observable } from 'rxjs';
+import { IProductInCart } from '../interface/interface.product.in.cart';
 
 @Injectable({
   providedIn: 'root'
 })
-export class CartService implements OnDestroy{
+export class CartService implements OnInit,OnDestroy{
 
   constructor(
     private storageService:storageService,
     private productService:ProductService
-  ) {
-    this.getQuantity().subscribe(q=>{console.log(q);this.cartQuantiti$.next(q)});
-    console.log(26)
-
+    ) {
+      // this.cartOwner.subscribe(cartOwner=>this.cartOwnerValue='cart-'+ cartOwner)
+     }
+  ngOnInit(): void {
+    // console.log('call cartServis oninit')
   }
-unsubscribe$:Subject<any>=new Subject<any>();
+  cartOwner:BehaviorSubject<string>=new BehaviorSubject<string>('');
 
-setCart(id:string,quantity:number){
-  let cart:ICart[]=this.storageService.getItem('cart');
-  this.cartQuantiti$.next(this.cartQuantiti$.getValue()+quantity)
-  if(cart){
-    let IdExist=false
-    cart.forEach((item:ICart)=>{
-      if(item.id===id){
-        item.quantity=item.quantity+quantity;
-        IdExist=true;}
-      })
-      if(!IdExist) cart.push({id:id, quantity:quantity});
-      this.storageService.setItem('cart',cart)
-    }else{
-      this.storageService.setItem('cart',[{id:id, quantity:quantity}])
-    }
-  }
+  cartOwnerValue:string='cart-'+localStorage.getItem('email')||''
 
-  getCart():Observable<IProduct[]>{
-     let cart:ICart[]=this.storageService.getItem('cart');
-     if(!cart) return of([])
-     let result:IProduct[]=[];
-     let products=this.productService.products$.getValue().map(p=>p);
-     cart.forEach((item:ICart)=>{
-      let prod=products.find(p=>p.id===item.id)
-      if(prod){
-       let quantity
-       prod.quantity >= item.quantity?quantity=item.quantity:quantity=prod.quantity;
-       result.push({...prod, quantity:quantity});
+  unsubscribe$:Subject<any>=new Subject<any>();
+
+  productInCart$:BehaviorSubject<IProductInCart[]>=new BehaviorSubject<IProductInCart[]>([]);;
+
+  carts$:BehaviorSubject<ICart[]>=new BehaviorSubject<ICart[]>(this.storageService.getItem('cart-'+localStorage.getItem('email')));
+
+addToCart(productId:string):ICart[]{
+    const cartsInStorage:ICart[]=this.storageService.getItem('cart-'+localStorage.getItem('email'));
+    let itemExists:boolean=false
+    let newCarts:ICart[]=cartsInStorage.map((cart:ICart)=>{
+            if(productId===cart.id){
+              itemExists=true;
+              return  {...cart,quantity:(cart.quantity+1)}
+            }
+            else{
+              return cart
+            }
+          })
+        if(itemExists===false){
+          newCarts=[...newCarts,{id:productId,quantity:1}]
+          this.storageService.setItem('cart-'+localStorage.getItem('email'), newCarts)
+          this.carts$.next(newCarts);
+          this.getCartProducts().subscribe(p=>p)
+          return newCarts
         }
-      else{
-        this.productService.getProductById(item.id).subscribe({
-          next: prod=>{
-            let quantity
-            prod.quantity >= item.quantity?quantity=item.quantity:quantity=prod.quantity;
-            result.push({...prod, quantity:quantity});
-          },
-          error:({error})=>console.error(error.message)
-        })
-      }
+        else{
+          this.storageService.setItem('cart-'+localStorage.getItem('email'), newCarts)
+          this.carts$.next(newCarts);
+          this.getCartProducts().subscribe(p=>p)
+          return newCarts
+        }
 
-    })
-     return of(result)
+
+    }
+
+deleteFormCart(productId:string):ICart[]{
+    const cartsInStorage:ICart[]=this.storageService.getItem('cart-'+localStorage.getItem('email'));
+    let newCarts:ICart[]=[]
+        for(let cart of cartsInStorage){
+            if(productId===cart.id){
+                if(cart.quantity>1){
+                  newCarts.push({...cart,quantity:(cart.quantity-1)})
+                }
+            }
+            else{
+               newCarts.push(cart)
+            }
+          }
+          this.storageService.setItem('cart-'+localStorage.getItem('email'), newCarts)
+          this.carts$.next(newCarts)
+          this.getCartProducts().subscribe(p=>p)
+          return newCarts
+        }
+
+deleteCartById(productId:string):ICart[]{
+    const cartsInStorage:ICart[]=this.storageService.getItem('cart-'+localStorage.getItem('email'));
+    let newCarts:ICart[]=[]
+        for(let cart of cartsInStorage){
+           if(productId!==cart.id){
+                newCarts.push(cart)
+               }
+        }
+        this.storageService.setItem('cart-'+localStorage.getItem('email'), newCarts)
+        this.carts$.next(newCarts)
+        this.getCartProducts().subscribe(p=>p)
+        return newCarts
   }
- getQuantity():Observable<number>{
-  let res=0
-  this.storageService.getItem('cart').map((item:ICart)=>res+=item.quantity);
-  return of(res)
- }
 
-cartQuantiti$:BehaviorSubject<number>=new BehaviorSubject<number>(0)
+  getCartProducts():Observable<IProductInCart[]>{
+    let carts=[...this.carts$.getValue()] //copy array from carts$;
+    console.log('carts$:', carts);
+    console.log('cartOwnerValue :', 'cart-'+localStorage.getItem('email'))
+    let cartsIds=carts.map(c=>c.id)
+    if(!cartsIds.length) this.productInCart$.next([])
+    return this.productService.getProductsByIds(cartsIds)
+    .pipe(map(data=>{
+      let result:IProductInCart[]=[]
+      data.map((p:IProduct)=>{
+        let orderQuantity=carts.find(c=>c.id===p.id)?.quantity
+        if(orderQuantity&&p) result.push({...p,orderQuantity:orderQuantity})
+      })
+      this.productInCart$.next(result)
+       return result
+      }))
+  }
+
 
 ngOnDestroy(): void {
   this.unsubscribe$.next(null);

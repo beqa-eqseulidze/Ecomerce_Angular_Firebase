@@ -3,6 +3,8 @@
   import { HttpClient } from '@angular/common/http';
   import { BehaviorSubject, Observable, tap } from 'rxjs';
   import { ISignUpBody, IAuthResponce } from '../interface/interface.signUp';
+import { CartService } from './cart.service';
+import { storageService } from './storage.service';
 
   @Injectable({
     providedIn: 'root'
@@ -13,6 +15,8 @@
 
     constructor(
       private http:HttpClient,
+      private cartService:CartService,
+      private storageService:storageService
     ) {
       this.usersBaseUrl= environment.usersBaseUrl;
       this.apiKey=environment.apiKey;
@@ -36,6 +40,9 @@
       localStorage.setItem('email',responce.email);
       this.isAuth$.next(!!localStorage.getItem('idToken'))   //if user logd in isAuth Subject value will be true otherwise false
       this.getEmail$.next(responce.email);
+      this.cartService.carts$.next((this.storageService.getItem('cart-'+localStorage.getItem('email'))))
+
+      // this.cartService.cartOwner.next(responce.email);
   }
 
   logout() {
@@ -44,8 +51,9 @@
       localStorage.removeItem('email');
       this.isAuth$.next(!!localStorage.getItem('idToken')) //if user logd in isAuth Subject value will be true otherwise false
       this.getEmail$.next('Login')
+      // this.cartService.cartOwner.next('');
+      this.cartService.productInCart$.next([]);
     }
-
 
   isAuth$:BehaviorSubject<boolean>=new BehaviorSubject<boolean>(!!localStorage.getItem('idToken'));// !!localStorage.getItem('idToken') this expresion is same as:  localStorage.getItem('idToken')?true:false
 

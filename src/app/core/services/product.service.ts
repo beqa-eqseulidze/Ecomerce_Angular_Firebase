@@ -1,7 +1,7 @@
 import { Injectable, OnDestroy } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { IProduct } from '../interface/interfaceProduct';
-import { map, Observable, BehaviorSubject, Subscription, of } from 'rxjs';
+import { map, Observable, BehaviorSubject, Subscription, of, forkJoin } from 'rxjs';
 import { environment } from '../../../environments/environment';
 
 @Injectable({
@@ -33,12 +33,21 @@ export class ProductService {
           }))
         }
 
-        getProductById(id:string):Observable<IProduct>{
+    getProductById(id:string):Observable<IProduct>{
           return this.http.get<IProduct>(`${this.baseUrl}/${this.documentName}/${id}.json`)
               .pipe(map(product=>{
                 return {...product,id:id}
               }))
           }
+
+    getProductsByIds(ids:string[]):Observable<IProduct[]>{
+        let responece=ids.map(id=>this.http.get<IProduct>(`${this.baseUrl}/${this.documentName}/${id}.json`)
+        .pipe(map(res=>{return {...res,id:id}}))
+        )
+        return forkJoin(responece).pipe(map(d=>d.filter(item=>item!==null)))
+      }
+
+
 
     delete(id:string):Observable<any> {
       return this.http.delete<any>(`${this.baseUrl}/${this.documentName}/${id}.json`)
